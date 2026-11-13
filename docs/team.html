@@ -1,25 +1,451 @@
 <!DOCTYPE html>
-<html lang="zh"><head>
+<html lang="zh">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="60">
-<title>爆款雷达 · 还在加载</title>
+<title>工作台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-  body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
-       background:#0a0d13;color:#e8e8ea;text-align:center;padding:24px;
-       font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif}
-  .spin{width:34px;height:34px;margin:0 auto 26px;border:3px solid #2a2f3a;
-        border-top-color:#ff785a;border-radius:50%;animation:s 1s linear infinite}
-  @keyframes s{to{transform:rotate(360deg)}}
-  h1{font-size:23px;margin:0 0 14px;font-weight:600}
-  p{margin:8px 0;color:#9a9aa2;font-size:15px;line-height:1.75}
-  .hint{margin-top:30px;font-size:13.5px;color:#6e6e78}
-  @media(prefers-reduced-motion:reduce){.spin{animation:none}}
-</style></head><body><div>
-  <div class="spin"></div>
-  <h1>你的页面还在加载中,请稍等</h1>
-  <p>第一次大约需要 20-60 分钟。</p>
-  <p>这一页会自己刷新,你可以先去忙别的。</p>
-  <p class="hint">等很久都没变?回到安装 SOP 第 7 步,<br>到仓库的 Actions 看 Sync Content 有没有跑完。</p>
-</div></body></html>
+  :root {
+    --bg:#0a0d13; --card:#11151d; --card-hi:#151a24; --border:#1d2430; --border-hi:#2c3546;
+    --text:#e8ecf3; --muted:#8a94a6; --faint:#5b6577; --accent:#5ea1ff; --green:#3fd68f;
+    --orange:#f0a33f; --pink:#ff6b9d; --red:#ff5c5c; --fire1:#ff8a3d; --fire2:#ff4d6d;
+    --font:'Inter',-apple-system,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+    --disp:'Space Grotesk','Inter','PingFang SC','Microsoft YaHei',sans-serif;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:var(--font); -webkit-font-smoothing:antialiased; }
+  ::selection { background:rgba(94,161,255,.3); }
+  ::-webkit-scrollbar { width:10px; } ::-webkit-scrollbar-thumb { background:#232c3b; border-radius:8px; }
+  :focus-visible { outline:2px solid var(--accent); outline-offset:2px; border-radius:6px; }
+  .ic { width:14px; height:14px; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; fill:none; flex:none; }
+
+  header { position:sticky; top:0; z-index:50; background:rgba(10,13,19,.86);
+    backdrop-filter:blur(14px); border-bottom:1px solid var(--border); padding:13px 20px; }
+  .hrow { display:flex; flex-wrap:wrap; gap:10px; align-items:center; max-width:1200px; margin:0 auto; }
+  .brand { display:flex; align-items:center; gap:10px; margin-right:auto; }
+  .mark { width:31px; height:31px; border-radius:9px; display:grid; place-items:center;
+    background:linear-gradient(135deg,var(--fire1),var(--fire2)); box-shadow:0 4px 16px rgba(255,92,80,.35); }
+  .mark .ic { width:17px; height:17px; color:#fff; }
+  h1 { font-family:var(--disp); font-size:16.5px; font-weight:700; line-height:1.15; }
+  h1 small { display:block; color:var(--faint); font-family:var(--font); font-weight:400; font-size:10.5px; }
+  .me { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--muted); cursor:pointer;
+    background:var(--card); border:1px solid var(--border); border-radius:10px; padding:7px 12px;
+    transition:border-color .18s; }
+  .me:hover { border-color:var(--border-hi); }
+  .me b { color:var(--text); }
+
+  nav { display:flex; gap:7px; max-width:1200px; margin:12px auto 0; flex-wrap:wrap; }
+  .ntab { display:inline-flex; align-items:center; gap:7px; background:var(--card);
+    border:1px solid var(--border); border-radius:999px; padding:7px 16px; font-size:13.5px;
+    color:var(--muted); cursor:pointer; user-select:none; transition:all .18s; }
+  .ntab:hover { border-color:var(--border-hi); color:var(--text); }
+  .ntab.on { color:var(--text); background:linear-gradient(135deg,rgba(255,138,61,.15),rgba(255,77,109,.15));
+    border-color:rgba(255,120,90,.45); }
+
+  main { max-width:1200px; margin:22px auto; padding:0 20px; }
+  .page { display:none; } .page.on { display:block; }
+
+  .stats { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px; }
+  .stat { flex:1; min-width:130px; background:var(--card); border:1px solid var(--border);
+    border-radius:14px; padding:14px 16px; }
+  .stat .v { font-family:var(--disp); font-size:26px; font-weight:700; font-variant-numeric:tabular-nums; }
+  .stat .l { color:var(--faint); font-size:12px; margin-top:2px; }
+  .stat.sh .v { color:var(--orange); } .stat.dn .v { color:var(--green); } .stat.pd .v { color:var(--accent); }
+
+  section { background:var(--card); border:1px solid var(--border); border-radius:16px;
+    padding:16px 18px; margin-bottom:16px; }
+  section h2 { font-size:14px; font-weight:600; display:flex; align-items:center; gap:8px; margin-bottom:12px; }
+  section h2 .ic { color:var(--orange); }
+  section h2 small { color:var(--faint); font-weight:400; font-size:11.5px; margin-left:auto; }
+  .row { display:flex; align-items:center; gap:10px; padding:10px 0; border-top:1px solid var(--border);
+    font-size:13px; flex-wrap:wrap; }
+  .row .hookline { flex:1; min-width:200px; color:var(--text); overflow:hidden; text-overflow:ellipsis;
+    white-space:nowrap; }
+  .row .hookline small { color:var(--faint); display:block; font-size:11px; margin-top:1px; }
+  .row .who2 { color:var(--accent); text-decoration:none; font-weight:600; font-size:12px; white-space:nowrap; }
+  .xb { font-family:var(--disp); font-weight:600; font-size:11px; color:var(--orange);
+    border:1px solid rgba(240,163,63,.4); background:rgba(240,163,63,.07); border-radius:99px;
+    padding:2px 8px; white-space:nowrap; }
+  .pill { display:inline-flex; align-items:center; gap:4px; background:#0c0f16; color:var(--muted);
+    border:1px solid var(--border); border-radius:9px; padding:5.5px 10px; font-size:11.5px;
+    cursor:pointer; text-decoration:none; font-family:var(--font); transition:all .18s; white-space:nowrap; }
+  .pill .ic { width:11px; height:11px; }
+  .pill:hover { color:var(--accent); border-color:rgba(94,161,255,.5); }
+  .pill.ok:hover { color:var(--green); border-color:rgba(63,214,143,.5); }
+  .pill.bad:hover { color:var(--red); border-color:rgba(255,92,92,.5); }
+  .none { color:var(--faint); font-size:13px; padding:14px 0 6px; }
+
+  .act { display:flex; gap:9px; padding:7px 0; border-top:1px solid var(--border);
+    font-size:12.5px; color:var(--muted); }
+  .act time { color:var(--faint); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .act b { color:var(--text); font-weight:600; }
+  .act .to { color:var(--orange); }
+
+  #radarWrap { height:calc(100vh - 150px); min-height:500px; border:1px solid var(--border);
+    border-radius:16px; overflow:hidden; }
+  #radarWrap iframe { width:100%; height:100%; border:0; }
+
+  .sop { max-width:820px; }
+  .sop h3 { font-size:15px; margin:22px 0 10px; display:flex; gap:8px; align-items:center; }
+  .sop h3 .ic { color:var(--orange); }
+  .sop ol { margin:0 0 8px 22px; color:var(--muted); font-size:13.5px; line-height:1.9; }
+  .sop ol b { color:var(--text); }
+  .sop p { color:var(--muted); font-size:13px; line-height:1.7; margin-bottom:6px; }
+  .sop table { border-collapse:collapse; font-size:13px; margin:8px 0; }
+  .sop td, .sop th { border:1px solid var(--border); padding:7px 14px; color:var(--muted); }
+  .sop th { color:var(--text); background:var(--card-hi); }
+
+  #mission { border:1px solid rgba(255,120,90,.35); border-radius:16px; padding:15px 18px;
+    margin-bottom:14px; background:linear-gradient(135deg,rgba(255,138,61,.10),rgba(255,77,109,.10)); }
+  #mission .mt { font-weight:600; font-size:14px; display:flex; gap:8px; align-items:center; }
+  #mission .mt .ic { color:var(--orange); }
+  #mission .md { color:var(--muted); font-size:12.5px; margin-top:5px; line-height:1.6; }
+  #mission .md b { color:var(--text); font-family:var(--disp); }
+  #overlay { position:fixed; inset:0; background:rgba(6,8,12,.88); backdrop-filter:blur(6px);
+    z-index:200; display:none; place-items:center; }
+  #overlay.show { display:grid; }
+  .obox { background:var(--card); border:1px solid var(--border-hi); border-radius:18px;
+    padding:28px 30px; width:min(92vw,380px); }
+  .obox h2 { font-family:var(--disp); font-size:18px; margin-bottom:6px; }
+  .obox p { color:var(--muted); font-size:13px; margin-bottom:16px; }
+  .obox input, .obox select { width:100%; background:#0c0f16; color:var(--text);
+    border:1px solid var(--border); border-radius:10px; padding:10px 13px; font-size:14px;
+    font-family:var(--font); margin-bottom:11px; }
+  .obox input:focus, .obox select:focus { border-color:var(--accent); outline:none; }
+  .obox button { width:100%; background:linear-gradient(135deg,var(--fire1),var(--fire2));
+    color:#fff; border:0; border-radius:10px; padding:11px; font-size:14px; font-weight:600;
+    font-family:var(--font); cursor:pointer; }
+  .obox button:active { transform:scale(.98); }
+
+  #toast { position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(8px);
+    background:var(--card-hi); border:1px solid var(--border-hi); border-radius:11px;
+    padding:11px 20px; font-size:13px; display:none; z-index:300; opacity:0;
+    box-shadow:0 12px 32px rgba(0,0,0,.5); transition:opacity .2s, transform .2s; }
+  #toast.show { display:block; opacity:1; transform:translateX(-50%) translateY(0); }
+  @media (prefers-reduced-motion: reduce) { * { animation:none!important; transition:none!important; } }
+</style>
+</head>
+<body>
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="i-flame" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+  <symbol id="i-ext" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+  <symbol id="i-video" viewBox="0 0 24 24"><path d="m10 8 6 4-6 4Z"/><rect x="2" y="4" width="20" height="16" rx="3"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></symbol>
+  <symbol id="i-radar" viewBox="0 0 24 24"><path d="M19.07 4.93A10 10 0 0 0 6.99 3.34"/><path d="M4 6h.01"/><path d="M2.29 9.62A10 10 0 1 0 21.31 8.35"/><path d="M16.24 7.76A6 6 0 1 0 8.23 16.67"/><path d="M12 18h.01"/><path d="M17.99 11.66A6 6 0 0 1 15.77 16.67"/><circle cx="12" cy="12" r="2"/><path d="m13.41 10.59 5.66-5.66"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+</svg>
+<header>
+  <div class="hrow">
+    <div class="brand">
+      <div class="mark"><svg class="ic"><use href="#i-flame"/></svg></div>
+      <h1>工作台<small id="updated"></small></h1>
+    </div>
+    <div class="me" id="meBtn" title="点击修改身份">
+      <svg class="ic"><use href="#i-user"/></svg><span id="meLabel">未登记</span>
+    </div>
+  </div>
+  <nav>
+    <div class="ntab on" data-p="work"><svg class="ic"><use href="#i-clock"/></svg>今日工作</div>
+    <div class="ntab" data-p="radar"><svg class="ic"><use href="#i-radar"/></svg>爆款雷达</div>
+    <div class="ntab" data-p="sop"><svg class="ic"><use href="#i-book"/></svg>SOP</div>
+  </nav>
+</header>
+<main>
+  <div class="page on" id="p-work">
+    <div id="mission"></div>
+    <div class="stats">
+      <div class="stat pd"><div class="v" id="stPending">–</div><div class="l">未处理(待挑选)</div></div>
+      <div class="stat sh"><div class="v" id="stShoot">–</div><div class="l">拍摄中</div></div>
+      <div class="stat dn"><div class="v" id="stDone">–</div><div class="l">已处理</div></div>
+    </div>
+    <section id="secShoot">
+      <h2><svg class="ic"><use href="#i-video"/></svg>拍摄中队列<small>做完一条,点「完成」</small></h2>
+      <div id="shootList"></div>
+    </section>
+    <section id="secPick">
+      <h2><svg class="ic"><use href="#i-flame"/></svg>本周待挑选爆款 Top 8<small>看中就点「选中拍摄」,细看去爆款雷达</small></h2>
+      <div id="pickList"></div>
+    </section>
+  </div>
+  <div class="page" id="p-radar"><div id="radarWrap"></div></div>
+  <div class="page sop" id="p-sop">
+    <section>
+      <h3><svg class="ic"><use href="#i-flame"/></svg>SOP-01 · Marketer 每周选题流程(周一,约30分钟)</h3>
+      <ol>
+        <li>打开<b>爆款雷达</b>,点快筛「<b>真爆款 ×2+</b>」+「<b>近7天</b>」</li>
+        <li>看「爆款热词」确认本周主题方向(热词越多的主题越优先)</li>
+        <li>挑 <b>3–5 条</b>适合改编的。标准:话题跟我们相关 / Hook 可复制 / 我们拍得出来</li>
+        <li>每条点「<b>Brief</b>」复制 → 发到拍摄群</li>
+        <li>把选中的卡片<b>拖到「拍摄中」</b></li>
+        <li>明显不适合的拖「跳过」,保持未处理越少越好</li>
+      </ol>
+    </section>
+    <section>
+      <h3><svg class="ic"><use href="#i-video"/></svg>SOP-02 · Content Creator 拍摄改编流程(每条 ≤1天)</h3>
+      <ol>
+        <li>打开工作台「<b>今日工作</b>」,看拍摄中队列,从最旧的开始</li>
+        <li>打开原帖看 <b>3 遍</b>:第1遍看整体 / 第2遍拆 Hook(前3秒为什么让人停下) / 第3遍记结构(几个镜头、什么节奏)</li>
+        <li><b>改编不照抄</b>:换成我们的案例、口吻、行业。保留结构,替换内容</li>
+        <li>拍摄 → 剪辑。<b>前3秒必须有钩子</b>,字幕开头即出</li>
+        <li>发布后回到工作台,该条点「<b>完成</b>」</li>
+      </ol>
+    </section>
+    <section>
+      <h3><svg class="ic"><use href="#i-book"/></svg>SOP-03 · 状态定义(团队统一语言)</h3>
+      <table>
+        <tr><th>状态</th><th>意思</th><th>谁负责改</th></tr>
+        <tr><td>未处理</td><td>还没人筛选过</td><td>Marketer 每周清理</td></tr>
+        <tr><td>拍摄中</td><td>已选中,正在改编/拍摄/剪辑</td><td>Marketer 选中时拖入</td></tr>
+        <tr><td>已处理</td><td>已发布或已完成改编</td><td>Creator 完成时点</td></tr>
+        <tr><td>跳过</td><td>不适合我们,不再考虑</td><td>任何人</td></tr>
+      </table>
+    </section>
+    <section>
+      <h3><svg class="ic"><use href="#i-radar"/></svg>SOP-04 · 看到「引流」标签的帖子怎么学</h3>
+      <p>带「引流」标的帖子,重点<b>不是内容,是漏斗</b>。记录三件事:</p>
+      <ol>
+        <li>留言<b>关键词</b>是什么?(例:留言「Start」)</li>
+        <li>送的<b>诱饵</b>是什么?(模板 / 课程 / 清单)</li>
+        <li>之后导去<b>哪里</b>?(DM 自动回复 → 链接 → 报名页)</li>
+      </ol>
+      <p>好的打法直接抄结构,用我们的 GHL / ManyChat 实现。</p>
+    </section>
+    <section>
+      <h3><svg class="ic"><use href="#i-user"/></svg>SOP-05 · 竞对名单管理(发现好账号就加进来)</h3>
+      <ol>
+        <li>打开 Supabase「<b>competitors</b>」表,加一行</li>
+        <li><b>Username</b>:贴账号名或 IG <b>主页</b>链接都行(带 ?igsh= 参数没关系;不要贴帖子链接)</li>
+        <li><b>Tracker</b>:选 IG Competitors 或 AI Competitors</li>
+        <li><b>Active</b>:打勾✅ — <b>没勾不会抓</b></li>
+        <li>每周一自动生效;停止追踪 = 取消勾,不用删行</li>
+      </ol>
+      <p>加账号的标准:跟我们领域相关 / 内容有爆款相 / 值得学。发现雷达里某账号长期没爆款,把它 Active 取消,腾出额度换新的。</p>
+    </section>
+    <section>
+      <h3><svg class="ic"><use href="#i-user"/></svg>SOP-06 · 第一次设置 & 常见问题</h3>
+      <ol>
+        <li><b>登记身份:</b>第一次打开工作台会弹「你是谁」→ 输名字、选角色。这决定你看到的任务卡和排版</li>
+        <li><b>直接改状态:</b>雷达里把卡片拖到上方分类,或用卡片下拉选。看到绿色 ✓ 就成了。<b>不需要输任何密钥</b> —— 这套系统天生只允许改状态,改不了别的数据,所以安全无需登录</li>
+      </ol>
+      <p><b>常见问题:</b></p>
+      <table>
+        <tr><th>现象</th><th>原因</th><th>解决</th></tr>
+        <tr><td>改了状态没反应 / 报错</td><td>网络断了,或页面是旧版</td><td>刷新页面(Ctrl+Shift+R)再试</td></tr>
+        <tr><td>队友改的状态我看不到</td><td>页面最多 10 分钟同步一次</td><td>刷新页面即可;自己的改动是即时的</td></tr>
+        <tr><td>网页打不开 / 数据是空的</td><td>每周自动更新那天可能还在跑</td><td>等 1 小时后再开;还不行找老板看 GitHub Actions</td></tr>
+      </table>
+      <p>状态存在云端(Supabase),换电脑、关机都不会丢,全团队实时共享。</p>
+    </section>
+  </div>
+</main>
+<div id="overlay"><div class="obox">
+  <h2>👋 你是谁?</h2>
+  <p>登记一次,方便团队知道是谁在操作。</p>
+  <input id="oName" placeholder="你的名字" maxlength="20">
+  <select id="oRole">
+    <option value="Marketer">Marketer(选题/投放)</option>
+    <option value="Content Creator">Content Creator(拍摄/剪辑)</option>
+    <option value="Boss">Boss</option>
+  </select>
+  <button id="oSave">进入工作台</button>
+</div></div>
+<div id="toast"></div>
+<script id="data" type="application/json">[{"id": "Dd0zn6pldcn", "tracker": "saving 竞对", "competitor": "thehazwanihashim", "caption": "Kalau simpan emas, mesti dapat lebih sebab harga emas makin meningkat. Harga emas meningkat 10% setahun dan tahun 2025 meningkat sebanyak 40%\n\nSimpan emas untuk kahwin sambil dapat kaut untung. Yang berminat nak mulakan simpanan emas rujuk pinned video atau chat je saya nanti saya akan bimbing tuan puan sepenuhnya. #saving #simpanemas #emas999 #publicgold #publicgoldterengganu", "transcript": "Terima kasih kerana menonton!", "brk": "Hook类型: 数字承诺\n结构: 收益趋势说明 → 结婚储蓄场景 → 引导私信咨询\n为什么火: 用2025年金价上涨40%的确定性预期，直击年轻人结婚成本高的痛点。\n改编角度: 结合华人婚礼高开销痛点，用“买金结婚等于自带增值”切入黄金储蓄。", "my": "薪水明明不算少，为什么到了月底户口里还是空空如也？\n\n很多人都以为，开始买黄金需要准备一大笔资金。\n\n其实不是这样的，存Q这件事，真的不用等准备好才开始。\n\n第一个方法，把GAP当作你的另一个银行户口。\n银行户口是储蓄马币，GAP是储蓄黄金。\n没有要求每个月都必须存蓄，有多余钱时随时可以存。\n慢慢累积克数，打破存钱拖延循环。\n\n第二个方法，不用一次买大克数的金块。\nPublic Gold提供一个储蓄黄金的设施，让我们一点一点存。\n如果说airasia是everyone can fly，在Public Gold就是everyone can buy gold。\n只要你至少有rm100，就可以开始存金了。\n\n第三个方法，自由决定提领你想要的实体黄金。\n累积到一定的克数之后，就可以提出来。\n你可以自己决定想提出什么，比如Goldbar、dinar或者金饰。\n未来回头看，余额真的会给你惊喜，每一分Q都是你的底气。\n\n以前总把攒Q理财挂嘴边，却一直拖到明天。\n现在用对方法，随时有多余钱就存一点，慢慢累积出属于自己的黄金。\n\n如果你想了解怎么开始存金，可以随时私信我，我来告诉你具体怎么做。", "tags": "saving, simpanemas, emas999, publicgold, publicgoldterengganu", "bait": false, "type": "Video", "likes": 5880, "comments": 9, "er": 32.17, "followers": 18307, "date": "2026-09-28", "url": "https://www.instagram.com/p/Dd0zn6pldcn/", "video": true, "ratio": 0, "score": 32.27, "status": "未处理", "x": 161.3}, {"id": "De21KWyzk7A", "tracker": "saving 竞对", "competitor": "susan.publicgold", "caption": "早安， 星期六", "transcript": "", "brk": "", "my": "", "tags": "", "bait": false, "type": "Image", "likes": 6, "comments": 0, "er": 10.71, "followers": 56, "date": "2026-10-24", "url": "https://www.instagram.com/p/De21KWyzk7A/", "video": false, "ratio": 0, "score": 10.71, "status": "未处理", "x": 1.5}, {"id": "DeanMfhgL1X", "tracker": "saving 竞对", "competitor": "susan.publicgold", "caption": "开箱啦！\n这一枚金片，我期待很久了！\n\n有什么特别？快看影片～\n\nZomok 这么多 deng deng deng deng 的？\n因为太期待了，自带音效！😆😂\n\n看到喜欢的限量款，最开心的就是：\n“还好平时有存黄金克数！”\n\n所以，平时慢慢 Top Up GAP。\n下次心动款一推出，克数够了，就可以赶快安排提取啦！\n\n #限量  #publicgold #大众金行 #susan珊姐 #黄金 #黄金储蓄 #黄金知识 #理财 #储蓄 #资产配置 #savings #gold", "transcript": "OK 來 各位 我們來開箱囉這個呢 裡面呢它跟我們平時的有一點不同為什麼呢 因為它它有一個給這個Key性這個Plasik的Key然後這個Eegrem的黃金那看到這輛跑車了嗎是不是很美 很可愛再給你們看一個更加更加神奇的東西那 不要眨眼睛啊不要眨眼睛不要眨眼睛看到嗎我把跑車拿出來了喔 對 這個的話Public Go只出產五千張而已Give me the spot card goYou keep the card自己去買", "brk": "Hook类型: 展示成果\n结构: 兴奋开箱 → 限量稀缺展示 → 晒单价值总结\n为什么火: 满足了观众的好奇心，直观展示了用平时积攒的黄金克数轻松兑换心仪限量款的成就感。\n改编角度: 强调“平时积少成多，关键时刻无痛拿下心仪限量金”的爽感，刺激观众开始定期存金。", "my": "2026年已经过半，你想过自己的余额有多少惊喜吗？\n\n很多人以为开始购买黄金需要大量资金，觉得要一次买下大克数的金块才叫存钱。\n\n其实不是这样的，存钱这件事，真的不用等准备好才开始。\n\n第一，你可以开通类似银行户口的GAP黄金储蓄设施。\n银行户口是储蓄马币，而GAP是储蓄黄金。\n它没有要求每个月都必须存蓄，有多余钱的时候可以随时存进去。\n\n第二，你可以慢慢累积黄金克数直到一定的克数。\n当心仪的限量金片或金条推出时，克数够了就可以直接提出来。\n在Public Gold，只要你有至少rm100就可以开始存金了。\n\n第三，你可以自由选择提取不同的实物。\n不管是Goldbar、dinar，还是手链、项链、戒指等金饰，都可以自己决定想提出什么。\n如果说airasia是everyone can fly，在Public Gold就是everyone can buy gold。\n\n以前总觉得存Q理财很难，每个月薪水花光光，总是把攒Q挂在嘴边却一直拖到明天。\n用对方法慢慢累积之后，回头看余额真的会给你惊喜，每一分Q都成了未来的底气。\n\n如果你也想开始存Q，可以先私讯我了解详情。\n你可以先看看我发给你的资料，如果有任何问题，可以随时问我。", "tags": "限量, publicgold, 大众金行, susan珊姐, 黄金, 黄金储蓄, 黄金知识, 理财, 储蓄, 资产配置, savings, gold", "bait": false, "type": "Video", "likes": 4, "comments": 0, "er": 7.14, "followers": 56, "date": "2026-10-13", "url": "https://www.instagram.com/p/DeanMfhgL1X/", "video": true, "ratio": 0, "score": 7.14, "status": "未处理", "x": 1.0}, {"id": "DfLkCmLOyPX", "tracker": "saving 竞对", "competitor": "susan.publicgold", "caption": "做黄金分享做到要唱歌，也是没想到的事😂\n你听完，有没有忍不住跟着哼？\n\n好笑归好笑，我想提醒的事情很实际：开始存黄金之前，先了解流程，也了解之后可以得到什么协助。\n\n怎样使用账户、怎样查看记录、想提实物时要注意什么……刚开始有这些疑问，很正常。\n\n有人愿意慢慢解释，之后有问题也找得到人，这份安心，对新手来说很重要。\n\n如果你正在了解 Public Gold，我可以先陪你把这些问题弄清楚。歌声就请多多包涵啦\n\n#PublicGold #susan珊姐 #黄金 #唱歌 #理财", "transcript": "今天這句提醒我決定用唱的等一下你腦裡一直重複這首歌不要怪我你們準備好了嗎來囉好了唱完了開戶口之前先了解開了之後也要知道有問題可以找誰這句話記得哦我是Suzanne我是Public Go的一名狄狼", "brk": "Hook类型: 反常识\n结构: 唱歌引出主题 → 揭示存金痛点 → 强调售后陪伴\n为什么火: 用唱歌的荒诞感制造反差，趣味化传达专业提醒，降低了新手戒备心。\n改编角度: 结合华人爱存金心理，用搞笑顺口溜唱出“买金找对人”，突出专属客服的安心感。", "my": "薪水并不低，为什么你到月底还是存不到钱？\n\n很多人以为，开始存黄金需要准备一大笔钱，或者必须每天盯着市场研究。\n\n其实真的不用，存Q这件事，不用等准备好才开始。\n\n第一，你可以用很轻松的方式开始。在 Public Gold 只要你有至少 rm100 就可以开始存金了，就像 airasia 是 everyone can fly，在这里就是 everyone can buy gold。\n\n第二，你可以建立像银行户口一样的习惯。开通 GAP 黄金储蓄设施，随时有多余钱的时候就储蓄，没有要求每个月都必须存蓄，完全没有压力。\n\n第三，你不需要一次买大克数。慢慢累积克数直到一定的克数，再提出来 Goldbar，dinar，或者金饰手链、项链、戒指都可以，自己决定想提出什么。\n\n以前你总把攒Q理财挂嘴边，却一直拖到明天，看着余额叹气。\n\n现在你可以打破存钱拖延循环，从今天开始存下每一分Q，未来都可能成为你的底气。\n\n如果你想了解怎么存金，可以先看看我发给你的资料，如果你有什么问题，可以随时问我。", "tags": "PublicGold, susan珊姐, 黄金, 唱歌, 理财", "bait": false, "type": "Video", "likes": 4, "comments": 0, "er": 7.14, "followers": 56, "date": "2026-11-01", "url": "https://www.instagram.com/p/DfLkCmLOyPX/", "video": true, "ratio": 0, "score": 7.14, "status": "未处理", "x": 1.0}, {"id": "DeMpRtKhXJC", "tracker": "saving 竞对", "competitor": "thehazwanihashim", "caption": "𝐓𝐡𝐞 𝐌𝐢𝐥𝐥𝐢𝐨𝐧𝐚𝐢𝐫𝐞 𝐑𝐨𝐚𝐝𝐦𝐚𝐩 ✨\n\nRamai orang nak capai RM1 juta pertama.\nTapi tak ramai yang ada roadmap untuk target tersebut.\n\nNak kukuhkan simpanan, hapuskan hutang dan nak bina aset: semuanya perlukan ilmu dan perancangan.\n\nMungkin tak ramai yang tahu, seminar inilah yang membuka mata saya untuk nampak cara yang lebih jelas dan praktikal untuk susun kewangan, kukuhkan simpanan dan bina kekayaan menuju RM1 Juta pertama.\n\nKalau anda memang ada impian nak bina RM1 juta pertama, jom kita belajar dan susun roadmap kewangan dalam Seminar Membina 1 Juta yang Pertama.\n\nTuan Mohd Zulkifli Shafie merupakan Chartered Accountant, mentor kewangan dan pengasas G100 Network, yang telah mendidik lebih 1 juta komuniti dan followers di Malaysia & Indonesia.\n\nAnda orang Tranung? Jom bersama Wanie di:\n\n📍 Dewan Ilmuan, Perpustakaan Terengganu\n📅 17 Oktober 2026 | Sabtu\n\nDM Wanie untuk secure seat anda. 🤍\n#m1jpterengganu #misiubahhidup1000keluarga", "transcript": "Saya nak buat kek carrot. Saya tambah madu, saya tambah tepung, saya tambah tembikai, carrot, ango. Mungkin boleh makan tapi belum tentu sedap. Begitu juga dengan keokangan, kita bukan sekarang dapat gaji bayar bel, belanja setiap bulan tanpa tahu ke mana kita nak pergi. X, Y kita perlukan roadmap. Lebih-lebih lagi kepada anda yang nak membina satu jutaan pertama. Kenapa roadmap ini penting? Sebab duit ini macam air. Kalau tak ada bekas dia akan mengalir tanpa arah tujuan. Sambil juga dengan duit, kalau tak ada tujuan, tahu-tahu hujung bulan dah habis. Sebab tu kalau kita nak bina satu jutaan pertama, kita kena tahu berapa banyak duit yang kita ada hari ini untuk digunakan. Berapa banyak nak simpan, berapa cepat untuk kita langsaikan hutang, berapa banyak aset yang perlu kita bina. Dan macam mana cara nak gunakan emas sebagai salah satu aset untuk membina kekayaan secara konsisten. Sebab duit yang banyak boleh jadi sedikit tanpa inmu, tapi duit yang sedikit boleh jadi banyak dengan inmu. That's why kita perlukan roadmap yang jelas. Untuk nak belajar kukuhkan kebangga dengan simpanan emas, nak langsaikan hutang dan nak membina harta bersih satu jutaan pertama. Saya nak jumpa hadiah Kedewan Ilmuwan Kuala Terengganu pada hari Sabtu 17 Oktober 2016. Masuk adalah persyuma dan jangan lupa hubungi saya untuk saya secure seat anda.", "brk": "Hook类型: 痛点直击\n结构: 做蛋糕喻义 → 钱像水无容器 → 黄金规划与百万目标\n为什么火: 用生动比喻揭示月光真相，结合名师讲座给出具体财富路径\n改编角度: 强调普通人如何靠gold saving积累第一桶金，结合线上活动引流", "my": "2026年已经过半，你还要继续当月光族吗？\n\n很多人以为，每个月领了薪水，扣掉账单跟开销，剩下的就是能存下来的钱。\n\n其实根本不是这样。\n\n如果没有一个清楚的存Q方式，你的钱就像水一样，不知不觉就流光了。\n\n存Q这件事，真的不用等准备好才开始。\n\n我们可以用三个简单的方式，把每个月的薪水慢慢变成未来的底气。\n\n第一个方式，打破存钱拖延的循环。\n\n别总把攒Q挂在嘴边，却一直拖到明天才做。\n\n只要你开始记贝长，把多余的钱存起来，到年底回头看，余额真的会给你惊喜。\n\n第二个方式，建立属于自己的GAP户口。\n\n很多人以为开始购买黄金需要大量资金，其实不是每个人都可以直接支付大克数的金块。\n\nPublic Gold提供一个储蓄黄金的设施称为GAP。\n\nGAP是类似银行户口，只是银行户口是储蓄马币，GAP是储蓄黄金。\n\n它和银行户口一样，没有要求每个月都必须存蓄，可以随时有多余钱时储蓄。\n\n第三个方式，慢慢累积克数再提出来。\n\n你可以累积金克直到一定的克数，再提出来Goldbar、dinar或者金饰。\n\n手链、项链、戒指等等，都可以自己决定想提出什么。\n\n在Public Gold，只要你有至少rm100就可以开始存金了。\n\n如果说AirAsia是everyone can fly，在Public Gold就是everyone can buy gold。\n\n你不需要懂复杂的投资，也不需要花很多时间看盘。\n\n以前总觉得存钱很难，薪水拿到手就花光，完全不知道钱去了哪里。\n\n用了GAP储蓄黄金之后，不仅每个月有得存，还能把钱变成看得到的实体黄金。\n\n如果你也想开始存Q，可以先看看我发给你的资料。\n\n如果你有什么问题，可以随时问我。", "tags": "m1jpterengganu, misiubahhidup1000keluarga", "bait": false, "type": "Video", "likes": 148, "comments": 8, "er": 0.85, "followers": 18307, "date": "2026-10-07", "url": "https://www.instagram.com/p/DeMpRtKhXJC/", "video": true, "ratio": 0, "score": 0.94, "status": "未处理", "x": 4.7}, {"id": "De8TazPCY5i", "tracker": "saving 竞对", "competitor": "ainulhayaaa", "caption": "Ramai sibuk kumpul duit untuk kahwin, tapi pernah terfikir nak kumpul emas untuk mas kahwin? 💍\n\nBuat anak muda yang sedang merancang perkahwinan, boleh pertimbangkan emas sebagai salah satu pilihan mas kahwin atau hantaran.\n\nSelain menjadi kenangan hari perkahwinan, emas juga boleh disimpan sebagai aset untuk masa depan.\n\nNak jadikan emas sebagai mas kahwin? Boleh mula rancang ikut kemampuan masing-masing.\n\n✨ 1 gram emas\n✨ 1 dinar emas (4.25 gram)\n✨ 5 dinar emas (21.25 gram)\n✨ Gold bar 50 gram\n\nTak semestinya kena terus beli banyak. Boleh mula kumpul sedikit demi sedikit dari sekarang.\n\nAlhamdulillah, lebih 100 orang penyimpan emas di bawah bimbingan saya dah sertai misi #MasKahwin sejak dua bulan lepas.\n\nMasing-masing teruja nak capai 1 dinar pertama mereka. 😍\n\nYang belum ada calon pun ada yang join sekali! Tak apa, sementara belum sampai masanya, kita kumpul aset dulu.\n\nBila tiba masa nak kahwin nanti, sekurang-kurangnya simpanan emas dah tersedia.\n\nNak mula dengan bajet RM100 pun bo", "transcript": "", "brk": "Hook类型: 痛点直击\n结构: 结婚筹备痛点 → 黄金替代方案 → 阶梯克重展示 → 行动引导\n为什么火: 切中年轻人结婚成本高痛点，将存钱买金与备婚结合，兼具仪式感与资产保值\n改编角度: 针对华人备婚族，主打“三金变现不如存金条当礼金”，强调小额起步降低门槛", "my": "很多人总觉得自己薪水不低，为什么到月底户口还是空空的？\n\n别总把攒Q理财挂嘴边，却一直拖到明天。\n\n你以为存钱一定要存下一大笔马币，或者必须一个月存好几千。\n\n其实不是这样的，真正让你存不到钱的原因，是你一直在等准备好的那一刻。\n\n在 Public Gold，只要你有至少 rm100 就可以开始存金了。\n\n你可以把 GAP 当成你的第二个银行户口。\n\n只是银行户口是储蓄马币，而 GAP 是储蓄黄金。\n\n这个设施最大的好处，是没有要求每个月都必须存蓄。\n\n你可以随时有多余钱时储蓄，一点一点把金克慢慢累积起来。\n\n当你慢慢累积到一定的克数，就可以自己决定想提出什么。\n\n你可以提出来 Goldbar，或者 dinar，甚至是手链、项链、戒指这些金饰。\n\n以前总是薪水一到手就花光，每个月都在重复存不到钱的循环。\n\n用了这个方法之后，每次看着户口里的黄金慢慢增加，心里就多了一份踏实感。\n\n如果你也想开始改变，可以先看看我发给你的资料。\n\n如果你有什么问题，可以随时问我。", "tags": "MasKahwin, kahwin, tips, saving, emas", "bait": false, "type": "Carousel", "likes": 272, "comments": 0, "er": 0.7, "followers": 39088, "date": "2026-10-26", "url": "https://www.instagram.com/p/De8TazPCY5i/", "video": false, "ratio": 0, "score": 0.7, "status": "未处理", "x": 3.7}, {"id": "DdtAp_7JgYg", "tracker": "saving 竞对", "competitor": "ainulhayaaa", "caption": "Tak perlu nampak kaya, yang penting kewangan kita betul-betul stabil. \n\nAda saving, ada emergency fund dan ada target kewangan sendiri. Belajar simpan duit, dan belajar juga simpan emas untuk jangka masa panjang.\n\nTak semua benda yang kita nak perlu terus buat loan. Kadang-kadang kita cuma perlukan masa untuk kumpul dan bersedia.\n\nStart saving dari sekarang. Future you will thank you. \n\nKalau nak mula bina simpanan emas, tak perlu tunggu ada duit banyak. Kita boleh mula sedikit demi sedikit. Ada akaun emas GAP sekarang dah mudah sangat. Minima RM100 dah boleh mula. \n\nNak saya tunjukkan cara mula? Komen “EMAS” atau klik link di bio ya. \n\n#emas999 #akaunemasgap #tips #saving", "transcript": "rotor", "brk": "Hook类型: 身份共鸣\n结构: 拒绝虚假富裕 → 强调财务健康与买金 → 给出低门槛行动方案\n为什么火: 击中普通人渴望财务稳定又怕门槛高的心理，用极低起步价降低行动阻力。\n改编角度: 突出“不用假装有钱，悄悄攒金才最安心”，主打RM100起步的小白黄金账户。", "my": "30岁存不到钱的女生，你是不是也这样？\n\n很多人以为，存Q理财这件事，一定要等到存款数字变大才能开始。\n\n其实不是，真正卡住你的，是总想着等准备好再行动。\n\n在Public Gold，只要你有至少rm100就可以开始存金了。\n\n第一步，开通类似银行户口却储蓄黄金的GAP。\n它和银行户口一样，没有要求每个月都必须存蓄。\n你可以随时有多余钱时储蓄的。\n慢慢累积金克直到一定的克数，再提出来金块。\n\n第二步，打破存钱拖延循环，不用一次支付大克数的金块。\n因为不是每个人都可以直接支付大克数的金块。\n把钱换成黄金存起来，让储蓄变得更持久。\n如果说airasia是everyone can fly，在Public Gold就是everyone can buy gold。\n\n第三步，随时可以把黄金提出来。\n可以提出来Goldbar，dinar，金饰，手链，项链，戒指等等。\n自己决定想提出什么。\n不用担心有隐藏费用，只有买卖差价和提出实物黄金时须付gold premium。\n\n以前你总把攒Q理财挂嘴边，却一直拖到明天，余额总是让你失望。\n现在开始存Q，不用等准备好，慢慢累积，未来都可能成为你的底气。\n\n如果你想了解怎么存金，现在就私信我。\n你可以先看看我发给你的资料，如果有什么问题，可以随时问我。", "tags": "emas999, akaunemasgap, tips, saving", "bait": false, "type": "Video", "likes": 175, "comments": 1, "er": 0.45, "followers": 39088, "date": "2026-09-25", "url": "https://www.instagram.com/p/DdtAp_7JgYg/", "video": true, "ratio": 0, "score": 0.46, "status": "未处理", "x": 2.4}, {"id": "Devar_rhR43", "tracker": "saving 竞对", "competitor": "thehazwanihashim", "caption": "Throwback tahun 2014, masa saya mula-mula kerja sebagai engineer di kilang.\n\nDulu saya selalu fikir dan cari jalan…\n\nBoleh ke saya jadi kaya dengan kerja sebagai engineer ni?\n\nBerapa lama agaknya nak tunggu sampai income lima angka sebulan? \n\nBerapa lama nak kumpul duit yang cukup supaya saya boleh hidup selesa, travel dan ada lebih banyak masa dengan family?\n\nMacam-macam soalan bermain dalam fikiran. Tapi masalahnya, saya sendiri tak tahu jawapannya sebab saya belum pernah sampai ke tahap tu.\n\nSampailah Allah rezekikan saya jumpa dengan bisnes yang ada sistem. Alhamdulillah dah 5 tahun dah dengan bisnes ni.\n\nMula-mula, saya pun belajar dari kosong. Banyak benda kena belajar, kena buat, kena ulang. Bukan terus pandai, bukan terus nampak hasil.\n\nTapi Alhamdulillah, siapa sangka bisnes inilah yang akhirnya mengubah kehidupan saya.\n\nDaripada seorang engineer yang terikat dengan rutin kerja 9-5, hari ini saya dah boleh urus masa sendiri, besarkan anak-anak sambil travel dan dalam masa yang", "transcript": "", "brk": "Hook类型: 痛点直击+身份共鸣\n结构: 工程师职业困惑 → 寻找转机与坚持 → 财富自由与提前退休\n为什么火: 真实职场痛点引发共鸣，加上“提前25年退休”的强结果反差\n改编角度: 结合普通打工人存钱难，用“把死工资变黄金资产”切入实现提前退休", "my": "存Q这件事，真的不用等准备好再开始吗？\n\n很多30岁女生工作很多年，薪水并不低，却一直存不到钱。\n\n大家总以为开始购买黄金需要大量资金，必须一次支付大克数的金块。\n\n其实不是这样的，不需要一次买大克数的金块。\n\nPublic Gold提供一个储蓄黄金的设施称为GAP，让我们慢慢累积金克直到一定的克数，再提出来金块。\n\nGAP是类似银行户口。只是银行户口是储蓄马币，GAP是存蓄黄金。\n\n第一，和银行户口一样，没有要求每个月都必须存蓄，可以随时有多余钱时储蓄。\n\n第二，不需要天天研究市场，因为黄金相对稳定，不需要花太多时间。\n\n第三，在Public Gold，只要你有至少rm100就可以开始存金了。\n\n以前总把攒Q理财挂嘴边，却一直拖到明天，余额总是给不出惊喜。\n\n用GAP慢慢累积以后，随时有多余钱就存一点，未来都可能成为你的底气。\n\n如果你想了解怎么存金，可以私讯我。\n\n好的你可以先看看我发给你的资料，如果你有什么问题，可以随时问我。", "tags": "lifejourney, dealerpublicgold", "bait": false, "type": "Video", "likes": 61, "comments": 0, "er": 0.33, "followers": 18307, "date": "2026-10-21", "url": "https://www.instagram.com/p/Devar_rhR43/", "video": true, "ratio": 0, "score": 0.33, "status": "未处理", "x": 1.6}, {"id": "DedAqXehITt", "tracker": "saving 竞对", "competitor": "thehazwanihashim", "caption": "Siapa sangka kan, mula dengan RM100 je, akhirnya boleh keluarkan barang kemas berpuluh gram ✨\n\nDulu ingat nak beli barang kemas kena cukup bajet ribu-ribu dulu. Sekarang dengan Public Gold, dah jauh lebih senang ✨\n\nCaranya, kumpul dulu dalam bentuk gram, sikit-sikit ikut kemampuan. Tak payah tunggu duit besar. Bila gram dah cukup, baru pilih nak jadikan apa.\n\nGelang untuk diri sendiri? Boleh.\nCincin untuk hari bahagia? Boleh.\nHadiah untuk mak atau pasangan? Pun boleh \n\nEmas ni bukan setakat cantik dipakai. Nilai dia masih ada, dan bila-bila perlu, boleh dijual semula.\n\nCantik pun dapat, untung pun dapat\n\nTonton video sampai habis untuk tahu caranya\n\nBerminat? Boleh hubungi kami, kami bantu sebaiknya 🌼\n\n#saving #simpanemas #emas999 #publicgold #emas916", "transcript": "Tuh, dah pening lah. Tak tahu nak pilih mana. Budget dah ada lah. Tapi sikit lagi tak cukup. Kan simpok masalah i-Count Cap kan? Cuma tunjuk. I-Count Cap ini, Mas Mas Mas M9. Tapi kita boleh keluarkan barang ke Mas Mas 1.6. Dan barang ke Mas Piju juga ni, yang bestnya, spread dia hanya 13% bila kita jual nanti. Kata kan nak keluarkan barang ke Mas Mas M9, spread dia hanya 9% Cantik berdapat, untung berdapat. Asyiknya kita pun lah tunggu-tunggu cukup. Kita boleh kelumbuhkan daripada i-Count Mas Cap. Betul. Kalau saya buat peci sebulan ni, ada dapat apa-apa tak? Bestilah ada. Ini purchase minimum 100 ringgit. Kita tak dapat joint lucky club. Laki club ni istimewaul kepada pembeli Piju Jual, yang buat pembelian minimum 100 ringgit daripada bulan Oktober, hingga di Jambon. Piju Jual akan pilih lima yang bertuah untuk menang hadiah utama, iaitu contoh dia DJ I Nano, dan banyak lagi. Dan hadiah utamanya adalah JLV ni. Jadi siapa-siapa yang berminat? Nak simpan emas boba dina, dan nak start kumpul barang ke Mas ni sikit-sikit. Start dulu seren dasar 100 ringgit, menarik ikhlas nomor mascap. Berminat nak daftar ikhlas nomor mascap? Beli DM kami nanti kami bantu sebaiknya.", "brk": "Hook类型: 痛点直击\n结构: 打破买金门槛高认知 → 细说小额积存与兑换机制 → 福利活动引流变现\n为什么火: 解决普通人觉得买金必须一次性拿几千块的痛点，展示小钱也能买金饰。\n改编角度: 针对华人强调“小钱积少成多变首饰”，突出门槛低且能拿实物与抽奖。", "my": "看着账户余额，是不是总觉得想买点好的奖励自己，却又不知道从哪里开始？\n\n很多人以为，买金条或者金饰需要准备好几千块大钱，才能开始。\n\n其实不是这样的，根本不需要等存够大钱才来买。\n\n第一，你可以开一个GAP户口，这个设施就像你的银行户口一样，银行户口是储蓄马币，而GAP是存蓄黄金。\n\n第二，这个户口没有强制要求每个月都必须存蓄，你可以随时在有多余钱的时候才放进去，按照自己的能力慢慢累积克数。\n\n第三，在Public Gold，只要你准备至少rm100，就可以开始存金了，一点一点把克数累积起来。\n\n以前想要买个金饰或者金块，总是觉得自己薪水不够，一直拖到明天，结果钱不知不觉花光了。\n\n现在只要有空多余时就存一点rm100，慢慢累积，克数够了就可以把实物金块、dinar或者金饰提出来，自己决定想要拿什么。\n\n如果你也想开始存Q，可以先私信我了解，我来带你一步步看怎么开始。", "tags": "saving, simpanemas, emas999, publicgold, emas916", "bait": false, "type": "Video", "likes": 35, "comments": 1, "er": 0.2, "followers": 18307, "date": "2026-10-13", "url": "https://www.instagram.com/p/DedAqXehITt/", "video": true, "ratio": 0, "score": 0.21, "status": "未处理", "x": 1.0}, {"id": "Ddi9hFpFCGA", "tracker": "saving 竞对", "competitor": "thehazwanihashim", "caption": "𝐃𝐚𝐫𝐢 𝐌𝐃𝐂 𝟏.𝟎 𝐡𝐢𝐧𝐠𝐠𝐚 𝐌𝐃𝐂 𝟏𝟎 𝐝𝐚𝐧 𝐬𝐞𝐭𝐞𝐫𝐮𝐬𝐧𝐲𝐚...\n\nBila tengok gambar-gambar ni balik,\nrupa-rupanya banyak betul yang dah berubah.\n\nBukan sekadar team.\nBukan sekadar pencapaian.\nTapi versi saya yang lebih baik.\n\nBetul kata mentor, setiap fasa dalam hidup memerlukan versi diri kita yang baru.\n\nMacam ulat yang perlu melalui fasa kepompong sebelum jadi rama-rama.\nFasa kepompong tu mungkin tak selesa.\nTapi tanpa fasa itu, dia takkan pernah belajar untuk terbang.\n\nSetiap kali naik ke fasa yang baru, banyak perkara yang saya kena tinggalkan.\n\nCara fikir yang lama.\nRutin lama.\nComfort zone ; dulu balik kerja layan movie.\nWekeend je pergi jalan-jalan\n\nMemang tak selesa. \n\nDan saya faham kenapa ada orang pernah tanya,\n\n“Sampai bila nak kena join training?”\n\nSoalan ni normal, especially bila kita baru nak biasakan diri dengan rutin yang baru.\nTapi cuba tengok balik rutin kita sekarang.\n\nAdakah kewangan kita berkembang dengan rutin yang sama?\n\nKalau hasilnya masih sama, dah tiba masa untuk kita buat s", "transcript": "", "brk": "Hook类型: 痛点直击\n结构: 现状对比 → 破茧比喻 → 改变认知 → 行动号召\n为什么火: 用破茧成蝶生动比喻个人成长，引发对现状与财富停滞的深度共鸣。\n改编角度: 结合攒金习惯，对比“月光族旧习惯”与“攒金新 rutin”，激发戒掉舒适圈的渴望。", "my": "2026年已经过半，你存下的Q真的够用吗？\n\n很多人以为，攒Q理财是一件很难的事。\n总觉得要等到薪水翻倍、存款变多，或者准备好一大笔钱的时候，才能开始行动。\n其实，存Q这件事，真的不用等准备好再开始。\n\n从现在开始，打破存钱拖延循环，其实只要用对方法。\n第一步，先了解GAP是什么。\nGAP是类似银行户口的一个储蓄黄金设施。\n只是银行户口是储蓄马币，GAP是存蓄黄金。\n这样你可以慢慢累积金克，直到一定的克数，再提出来金块。\n\n第二步，不用给自己太大的压力。\n它和银行户口一样，没有要求每个月都必须存蓄。\n你可以随时在有多余钱的时候储蓄，完全不用担心每个月被绑死。\n这样存钱，才不会因为压力太大而中途放弃。\n\n第三步，门槛其实比想象中低很多。\n因为不是每个人都可以直接支付大克数的金块。\n所以在Public Gold，只要你有至少rm100，就可以开始存金了。\n慢慢累积下来，未来回头看，余额真的会给你惊喜。\n\n以前总把攒Q理财挂嘴边，却一直拖到明天，结果薪水花光了什么都没留下。\n现在用GAP慢慢累积，随时有多余钱就存一点，心里反而觉得踏实很多。\n不要小看你存下的每一分Q，未来都可能成为你的底气。\n\n如果你也想开始存金，可以先看看我发给你的资料。\n如果你有什么问题，可以随时问我。", "tags": "misiubahhidup1000keluarga, dealerjourney", "bait": false, "type": "Carousel", "likes": 37, "comments": 0, "er": 0.2, "followers": 18307, "date": "2026-09-21", "url": "https://www.instagram.com/p/Ddi9hFpFCGA/", "video": false, "ratio": 0, "score": 0.2, "status": "未处理", "x": 1.0}, {"id": "De_gTxGptjw", "tracker": "saving 竞对", "competitor": "ainulhayaaa", "caption": "ADA EMAS, MAKNANYA ADA DUIT.\n\nKisah Puan Hafizah ni antara bukti bagaimana simpanan emas boleh dimanfaatkan ketika memerlukan wang tunai.\n\nBila dengar kisah macam ni, saya selalu terfikir…\n\nSetiap orang sebenarnya ada matlamat kewangan yang berbeza.\n\n✅ Ada yang nak selesaikan hutang lebih awal.\n✅ Ada yang nak tunaikan Haji atau Umrah.\n✅ Ada yang nak sediakan dana pendidikan anak.\n✅ Ada yang nak membina dana persaraan.\n✅ Ada juga yang nak ada aset ketika kecemasan.\n\nSebab tu saya percaya, kita mungkin tak tahu bila simpanan hari ini akan diperlukan. Tapi sekurang-kurangnya, bila sampai masanya kita ada pilihan.\n\nEmas boleh dijual atau dicagarkan melalui Ar-Rahnu, tertakluk kepada kos dan syaratnya.\n\nKalau Tuan/Puan pun ada matlamat kewangan yang nak dicapai, boleh mula menyimpan emas sedikit demi sedikit.\n\nReply “EMAS” atau DM saya. Insya-Allah saya bantu dari simpanan pertama.\n\n#emas #dealerpublicgold #g100network #saving", "transcript": "Siapa yang dekat sini dia pernah melalui satu fasa yang manis dia terdesak untuk dapat kesu jumlah duit yang besar. Saya dengar tu keisah daripada salah seorang penyimpan mas nama dia Puan Hafizah. Okey, kesa Puan Hafizah ni sangat menarik sebab pada ketika tu waktu di cerita dengan saya, dia memelukkan duit berdasarkan 20,000. 20,000 adalah satu jumlah yang besar, Puan Puan. Dan rata-rata kalau kita dalam keadaan tersebut di mana keadaan 7 dan sebagainya, kita mungkin akan pinjam duit sana sini ataupun tepat sejauh barang ataupun mungkin kita terpaksa buat dua-tiga kerja untuk mendapatkan jumlah 20,000 tersebut. Tapi berbeza dengan Puan Hafizah, disebabkan beliau sangat konsisten menambang emas beliau menggunakan plodina. Plodina hari ni kalau kita tengok harga dia adalah sekitar 25,000 ringgit. Jadi apa yang Puan Hafizah buat dengan emas yang dia konsisten simpan selama bertahun-tahun dia bawa emas tersebut pergi ke arah nu dan gadaikan emas tersebut. Jadi dalam tempoh tak sampai 10 minit beliau dah berjaya dapatkan 20,000 ringgit. Jadi bagi tompuan yang nak tahu lagi kesah inspirasi daripada penumpuan emas bagaimana mereka memangfaankan emas ketika mereka terdesak dan sebagainya tompong boleh follow saya. Dan kalau tompong belum ada lagi ekan emas dah cuba untuk simpan duit bertahun-tahun tak berjaya tompong boleh cuba untuk tukar kepada kaitah simpan dan emas. Boleh terus klik ni bio saya. Saya akan bantu tompong untuk simpan emas dengan elmu.", "brk": "Hook类型: 痛点直击\n结构: 真实急需大钱案例 → 对比传统借钱困境 → 黄金10分钟变现方案 → 引导咨询转化\n为什么火: 用真实真人急用钱背靠黄金10分钟解困的鲜明对比，精准击中华人对突发危机的焦虑。\n改编角度: 讲述本地华人客户急用现金靠金条10分钟Ar-Rahnu上岸的真实故事，吸引想抗通胀和防风险的人。", "my": "谁家里没有经历过手头紧、急着用钱的时候？\n\n很多人以为，存Q理财一定要准备很多资金。\n\n其实不是这样的，真正让你存不到钱的，是总觉得现在还没准备好。\n\n存Q这件事，真的不用等准备好再开始。\n\n第一，打破存Q拖延循环。\n别总把攒Q挂在嘴边，却一直拖到明天。\n从今天开始慢慢累积，把多余的钱存起来。\n\n第二，善用类似银行户口的操作。\nGAP就像银行户口，只是银行存马币，这里存黄金。\n不需要每个月都强制储蓄，有多余钱时随时可以存。\n\n第三，只要有至少 rm100 就可以开始。\n不需要一次买大克数，慢慢累积金克。\n累积到一定克数，就可以提出来 Goldbar、dinar 或者金饰。\n\n如果在 Public Gold，就像 airasia 一样，everyone can buy gold。\n记贝长、存Q，到年底回头看，余额真的会给你惊喜。\n不要小看你存下的每一分Q，未来都可能成为你的底气。\n\n如果你想了解怎么存金，可以先看看我发给你的资料。\n如果你有什么问题，可以随时问我。", "tags": "emas, dealerpublicgold, g100network, saving", "bait": false, "type": "Video", "likes": 54, "comments": 7, "er": 0.16, "followers": 39088, "date": "2026-10-27", "url": "https://www.instagram.com/p/De_gTxGptjw/", "video": true, "ratio": 0, "score": 0.19, "status": "未处理", "x": 1.0}, {"id": "DfgLDrOieGJ", "tracker": "saving 竞对", "competitor": "ainulhayaaa", "caption": "Ada target nak kahwin dalam 2–3 tahun lagi? Dah mula kumpul duit hantaran? 💍\n\nKalau dah ada perancangan nak mendirikan rumah tangga, elok sangat mula sediakan simpanan dari sekarang.\nSebab bila dah dekat tarikh nikah nanti, macam-macam kos yang perlu difikirkan. Bukan setakat hantaran dan mas kahwin je.\n\nContohnya, kalau sasaran kita RM12,000 dalam masa 24 bulan, boleh mula rancang untuk asingkan RM500 setiap bulan.\n\nSaya kongsikan strategi simpanan 24 bulan dalam carousel ni. Mana tahu boleh jadi panduan untuk yang sedang merancang nak kahwin. 😊\n\nSwipe untuk baca sampai habis. 👉\n\n💍 MISI DANA KAHWIN | 100 SLOT KHAS ANAK MUDA\nKhas untuk yang ada target nak kahwin dalam 1–3 tahun lagi dan belum mempunyai akaun emas Public Gold.\n\nKalau nak mula kumpul emas untuk persediaan kahwin, boleh WhatsApp saya melalui link di bio. Kita mulakan ikut kemampuan masing-masing. \n\nYang tengah merancang nak kahwin, target tahun berapa? 2027, 2028 atau 2029? \n\n#maskahwin #saving #gold #dealerpublicgold #ak", "transcript": "", "brk": "Hook类型: 痛点直击\n结构: 结婚开销痛点 → 24个月存款拆解 → 引导开通黄金账户\n为什么火: 戳中年轻人结婚备金痛点，用具体数字规划降低行动门槛\n改编角度: 结合华人结婚高额彩礼/金饰开销，推出“24个月攒金娶媳妇”计划", "my": "2026年已经过半，你想过存下的Q到底去哪了吗？\n\n很多人总觉得，攒Q理财是一件很难的事。\n以为一定要存到大笔金额，或者要懂复杂的投资技巧，才敢开始行动。\n\n其实不是这样的。\n存Q这件事，真的不用等准备好再开始。\n\n第一，打破存钱拖延循环。\n别总把攒Q理财挂嘴边，却一直拖到明天。\n因为不是每个人都可以直接支付大克数的金块。\nPublic Gold提供一个储蓄黄金的设施称为GAP，让我们慢慢累积金克直到一定的克数，再提出来金块。\n\n第二，像存马币一样存黄金。\nGAP是类似银行户口。\n只是银行户口是储蓄马币，GAP是存蓄黄金。\n也和银行户口一样，没有要求每个月都必须存蓄，可以随时有多余钱时储蓄的。\n\n第三，用门槛最低的方式开始。\n如果说AirAsia是everyone can fly，在Public Gold就是everyone can buy gold。\n在Public Gold，只要你有至少rm100就可以开始存金了。\n你可以提出Goldbar、dinar、金饰，手链、项链、戒指等等，自己决定想提出什么。\n\n以前工作很多年薪水并不低，却一直存不到钱。\n用对方法以后，慢慢累积金克，余额真的会给你惊喜。\n\n如果你有什么问题，可以随时问我。\n好的你可以先看看我发给你的资料。", "tags": "maskahwin, saving, gold, dealerpublicgold, akaunemasgap", "bait": false, "type": "Carousel", "likes": 53, "comments": 0, "er": 0.14, "followers": 39088, "date": "2026-11-09", "url": "https://www.instagram.com/p/DfgLDrOieGJ/", "video": false, "ratio": 0, "score": 0.14, "status": "未处理", "x": 0.7}, {"id": "Del4YlbgdZH", "tracker": "saving 竞对", "competitor": "thehazwanihashim", "caption": "Ingatkan rehearsal ni run through je, rupanya banyak benda yang kena belajar 😄\n\nHari ni kami berada di Kuala Terengganu untuk rehearsal Seminar Membina 1 Juta Pertama. Dari pukul 3 petang sampai 7 malam, kami teliti satu per satu persiapan untuk program esok.\n\nKali ni saya diberi amanah oleh Team G100 untuk lead bahagian protocol bagi seminar besar yang diadakan setahun sekali di Terengganu pada 17 Oktober.\n\nSejujurnya, bila dah berada di sebalik tabir, baru nampak betapa banyak perkara kecil yang kita kena ambil perhatian. Susunan, pergerakan, timing, koordinasi team dan macam-macam lagi.\n\nNampak macam benda kecil, tapi kalau tak diselaraskan dengan baik, boleh beri kesan kepada keseluruhan program.\n\nAlhamdulillah, satu lagi pengalaman baru untuk saya belajar dan keluar daripada zon selesa.\n\nPenat memang penat. Tapi bila diberi kepercayaan untuk memainkan peranan dalam program sebesar ini, saya anggap ia sebagai peluang untuk belajar sesuatu yang mungkin saya tak akan dapat kalau hany", "transcript": "", "brk": "Hook类型: 身份共鸣\n结构: 幕后筹备 → 发现细节重要性 → 个人成长感悟\n为什么火: 真诚记录幕后付出与挑战，引发奋斗者的情感共鸣与信任\n改编角度: 拆解买金背后的专业风控或幕后验金流程，展现严谨建立信任", "my": "2026年已经过半，你存下的余额还剩下多少？\n\n很多人以为，开始储蓄黄金需要准备一大笔资金。\n\n其实不是这样的，真正让你存不到钱的，是总把攒Q理财挂嘴边，却一直拖到明天。\n\n存Q这件事，真的不用等准备好再开始。\n\n第一，打破存钱拖延循环。\n别总把攒Q理财挂嘴边，却一直拖到明天。\n每个月只要有多余的钱就存一点，不用给自己太大压力。\n记贝长、存Q，到年底回头看，余额真的会给你惊喜。\n\n第二，善用类似银行户口的设施。\nGAP是类似银行户口。\n只是银行户口是储蓄马币，而GAP是存蓄黄金。\n它没有要求每个月都必须存蓄，可以随时有多余钱时储蓄的。\n\n第三，随时提出属于你的实体黄金。\n因为不是每个人都可以直接支付大克数的金块。\nPublic Gold提供一个储蓄黄金的设施称为GAP，让我们慢慢累积金克直到一定的克数，再提出来金块。\n你可以提出来Goldbar、dinar、金饰、手链、项链、戒指等等，自己决定想提出什么。\n\n以前总觉得存钱很难，薪水拿到手不知不觉就花光了。\n用对方法慢慢累积之后，才发现只要有至少rm100就可以开始存金了，不要小看你存下的每一分Q，未来都可能成为你的底气。\n\n如果你也想开始储蓄黄金，可以先看看我发给你的资料，如果有什么问题，可以随时问我。\n\n如果说AirAsia是everyone can fly，在Public Gold就是everyone can buy gold。", "tags": "", "bait": false, "type": "Carousel", "likes": 22, "comments": 1, "er": 0.13, "followers": 18307, "date": "2026-10-17", "url": "https://www.instagram.com/p/Del4YlbgdZH/", "video": false, "ratio": 0, "score": 0.14, "status": "未处理", "x": 0.7}, {"id": "Detmgm5Bjnm", "tracker": "saving 竞对", "competitor": "thehazwanihashim", "caption": "Jadi penyimpan emas tapi tak pernah masuk Menara Public Gold? Rugi tau! 😄\n\nCuba check akaun GAP anda, dah ada berapa gram emas dalam tu?\n\nKalau dah cukup gram, apa kata ambil pengalaman keluarkan barang kemas yang cantik-cantik macam cincin atau gelang. Best kan, emas yang kita simpan akhirnya boleh jadi barang kemas yang kita pakai sendiri. Atau kalau nak tukar kepada gold bar atau dinar pun boleh!\n\nKalau anda pula ada barang kemas lama, patah atau dah tak pakai, boleh bawa ke Menara Public Gold untuk jual dan dapatkan harga tertinggi dalam pasaran.\n\nPendek kata dalam 1 bangunan  Menara Public Gold ni boleh settle semua urusan. 1 stop centre ✨\n\nSave video ni tau. Nanti kalau dah sampai Menara Public Gold, senang nak rujuk dan tak sesat! 😉 \n\n#saving #simpanemas #tipskewangan #emas999 #publicgold", "transcript": "Pabrik gol dah berdapat di Malaysia sejak 2008 dan hari ini menara Pabrik gol dah jadi one stop centre untuk urusan jual emas anda Yang mana tak nak pusing emas boleh datang jika menara Pabrik gol kewakan direk daripada mesin ATM Nak beli gol bar dan dina pun boleh Nak beli barang kemas pun boleh Nak beli barang kemas, jam emas dan nak beli dua-dua pun boleh Barang kemas lama, kemik patah bengkok Jangan risau, datang jika menara Pabrik gol dan branch pijiju-piju yang berdekatan boleh jual dah dapatkan harga yang tertinggi Kalau rasa hilang pun tak apa, tak ada masalah kita boleh terus jual Takut hilang nak simpan emas di sini pun boleh Nak rolling modem business, perlukan tuan asa gara boleh terus ke KDE untuk paja emas di tingkat 8 Nak beli emas, nak keluarkan emas, nak jual emas nak simpan emas dalam petibusi dan nak paja emas, semuanya boleh dilakukan di dalam satu bangunan Jadi untuk anda yang berminat nak melekan simpan emas bersama Pabrik gol boleh terus hubungi saya nanti saya akan bantu anda dan jadi kat anda penyimpan emas yang beredamu", "brk": "Hook类型: 痛点直击\n结构: 亮出总部地标 → 展示全套服务 → 号召行动转换\n为什么火: 击中存金用户想把数字克数变成实物的心理，提供一站式安全感\n改编角度: 华人用户拍带娃去金店总部提金或换首饰的全过程，突出仪式感与靠谱", "my": "2026年已经过半，你存下的余额还剩下多少？\n\n很多人以为开始存黄金，需要准备一大笔资金才能动身。\n\n其实不是这样的，真正让你一直存不到钱的原因，是没有用对方法。\n\n第一点，你可以把GAP当作普通的银行户口来理解。\n只是银行户口是储蓄马币，而GAP是储蓄黄金。\n它没有要求每个月都必须存蓄，只要有多余的钱，随时都可以放进去。\n\n第二点，你不需要一次买大克数的金块。\n在Public Gold，只要你有至少rm100，就可以开始慢慢存金了。\n一点一点累积克数，直到达到你想要的数量。\n\n第三点，存下来的克数可以自由选择怎么用。\n你可以提出来Goldbar、dinar，或者金饰像是手链、项链和戒指。\n全部由你自己决定，想提出什么都可以。\n\n以前想存钱却总是拖延，余额看着看着就见底了。\n懂得用GAP慢慢累积黄金以后，看着克数一点点增加，心里才终于有了底气。\n\n如果你也想开始存Q，可以先私讯我了解怎么开通GAP户口，我来协助你。", "tags": "saving, simpanemas, tipskewangan, emas999, publicgold", "bait": false, "type": "Video", "likes": 26, "comments": 0, "er": 0.14, "followers": 18307, "date": "2026-10-20", "url": "https://www.instagram.com/p/Detmgm5Bjnm/", "video": true, "ratio": 0, "score": 0.14, "status": "未处理", "x": 0.7}, {"id": "Deyp6ECJfI6", "tracker": "saving 竞对", "competitor": "ainulhayaaa", "caption": "TIPS UNTUK WANITA YANG NAK JADIKAN EMAS SEBAGAI MAS KAHWIN 💍\n\nAda plan nak kahwin dalam tempoh 3 tahun lagi? Boleh mula kumpul dinar emas dari sekarang.\n\nSaya selalu kongsikan tips ni dengan penyimpan emas wanita di bawah bimbingan saya.\n\nContohnya, kalau target nak kumpul 1 dinar setiap 6 bulan:\n\n💛 Tahun pertama: 2 dinar\n💛 Tahun kedua: 4 dinar\n💛 Tahun ketiga: 6 dinar\n\nDalam masa 3 tahun, dah ada 6 dinar bersamaan 25.5 gram emas.\n\nBila dah dekat tarikh kahwin nanti, boleh jual dinar yang dikumpul tu kepada bakal suami pada harga yang dipersetujui.\n\nDuit hasil jualan kita dapat, kemudian bakal suami boleh gunakan dinar tersebut sebagai mas kahwin semasa akad nikah.\n\nAkhirnya, duit jualan dapat, mas kahwin dalam bentuk emas pun dapat! 😆\n\nTapi 6 dinar ni sekadar contoh ya. \nNak target 1 dinar, 3 dinar atau lebih pun boleh, ikut kemampuan dan perancangan masing-masing.\n\nKalau belum mampu beli 1 dinar sekaligus, boleh mula kumpul gram demi gram melalui #akaunemasgap.\n\nBakal pengantin, dah t", "transcript": "وعا عوسة النور تاج البذني يبريسها لجنني أشعبها نوارن وانوارن مبابك زوتها جاءت على دوارن زوجنا قائم بتاك ويد نوارب هاري", "brk": "Hook类型: 身份共鸣\n结构: 目标设定 → 储蓄规划 → 变现转化\n为什么火: 精准击中备婚女性对黄金彩礼的向往与储蓄焦虑\n改编角度: 针对华人备婚群体，强调买金攒金既能当彩礼又能自主增值", "my": "2026年已经过半，现在存钱还来得及吗？\n\n很多人以为，存钱理财一定要准备好大笔资金，或者每个月都得定下一大笔数额，才能真正存下属于自己的钱。\n\n其实不是这样的，别总把攒Q理财挂嘴边，却一直拖到明天。\n\n存Q这件事，真的不用等准备好再开始。\n\n第一点，打破存钱拖延循环。\n别总把攒Q理财挂嘴边，却一直拖到明天。\n从现在开始，不用等到每个月发薪水才来做规划。\n记贝长、存Q，到年底回头看，余额真的会给你惊喜。\n\n第二点，找到适合自己的储蓄设施。\n因为不是每个人都可以直接支付大克数的金块。\nPublic Gold提供一个储蓄黄金的设施称为GAP，让我们慢慢累积金克直到一定的克数，再提出来金块。\nGAP是类似银行户口，只是银行户口是储蓄马币，GAP是存蓄黄金。\n\n第三点，随时有多的钱就存。\n也和银行户口一样，没有要求每个月都必须存蓄，可以随时有多余钱时储蓄的。\n然后可以提出来Goldbar、dinar、金饰，手链、项链、戒指等等。\n在Public Gold，只要你有至少rm100就可以开始存金了。\n\n以前总觉得存钱很难，薪水拿到手不知不觉就花光了，根本存不到什么持久的东西。\n懂得开始慢慢累积每一分Q以后，看着户口里的克数一点点增加，心里才终于有了踏实的底气。\n\n如果你也想开始储蓄黄金，可以先来看看我发给你的资料。\n如果你有什么问题，可以随时问我。", "tags": "akaunemasgap, dinar, tipsbakalpengantin, emas, publicgold", "bait": false, "type": "Video", "likes": 50, "comments": 1, "er": 0.13, "followers": 39088, "date": "2026-10-22", "url": "https://www.instagram.com/p/Deyp6ECJfI6/", "video": true, "ratio": 0, "score": 0.14, "status": "未处理", "x": 0.7}, {"id": "DeS-t5SDeFH", "tracker": "saving 竞对", "competitor": "thehazwanihashim", "caption": "2 tahun lagi kahwin tanpa hutang Cara menabung emas rujuk ni: Wanie Hashim | Public Gold Yang berminat nak mulakan simpanan emas rujuk pinned video atau chat je saya nanti saya akan bimbing tuan puan sepenuhnya. #saving #simpanemas #emas999 #publicgold #publicgoldterengganu", "transcript": "chased by god egg", "brk": "Hook类型: 身份共鸣\n结构: 结婚痛点 → 存金方案 → 行动引导\n为什么火: 切中华人备婚族零负债结婚的强烈痛点与刚需\n改编角度: 结合华人“无痛备婚”，用买金条代替无效消费，实现金钱增值与婚礼筹备双赢", "my": "攒Q这件事，真的不用等准备好再开始！\n\n很多人都以为，开始购买黄金需要准备大量资金，或者必须一次支付大克数的金块。\n\n其实不是这样的，别总把攒Q理财挂嘴边，却一直拖到明天。\n\n如果说 airasia 是 everyone can fly，在 Public Gold 就是 everyone can buy gold。\n\n在 Public Gold，只要你有至少 rm100 就可以开始存金了。\n\nGAP 是类似银行户口，只是银行户口是储蓄马币，GAP 是储蓄黄金。\n\n也和银行户口一样，没有要求每个月都必须存蓄，可以随时有多余钱时储蓄的。\n\n然后可以提出来 Goldbar，dinar，金饰，手链，项链，戒指等等，可以自己决定想提出什么。\n\n以前工作了很多年，薪水并不低，却一直存不到钱，总觉得自己离黄金很远。\n\n懂得开始存Q之后，慢慢累积金克，余额真的会给你惊喜，未来都可能成为你的底气。\n\n你可以先看看我发给你的资料，如果你有什么问题，可以随时问我。", "tags": "saving, simpanemas, emas999, publicgold, publicgoldterengganu", "bait": false, "type": "Video", "likes": 20, "comments": 1, "er": 0.11, "followers": 18307, "date": "2026-10-10", "url": "https://www.instagram.com/p/DeS-t5SDeFH/", "video": true, "ratio": 0, "score": 0.13, "status": "未处理", "x": 0.7}, {"id": "Dd-MElnhlC4", "tracker": "saving 竞对", "competitor": "thehazwanihashim", "caption": "𝘽𝙚𝙧𝙨𝙮𝙪𝙠𝙪𝙧 𝙟𝙚, 𝙣𝙖𝙣𝙩𝙞 𝘼𝙡𝙡𝙖𝙝 𝙘𝙪𝙠𝙪𝙥𝙠𝙖𝙣…\n\nPernah ada yang tanya,\n\n“Wani, masa berhenti kerja 2023 tu, tak rasa kehidupan jadi downgrade ke?”\n\nAlhamdulillah, masa saya resign dari engineer, income bisnes hampir menyamai gaji saya. Seorang risk taker macam saya, saya yakin saya boleh buat dan yakin dengan rezeki Allah.\n\nLifestyle pun tak banyak berubah sebab dari awal saya pilih untuk hidup di bawah kemampuan, sebab saya ada impian yang besar.\n\nAllah berfirman dalam Surah An-Nahl, ayat 18:\n“𝘿𝙖𝙣 𝙟𝙞𝙠𝙖 𝙠𝙖𝙢𝙪 𝙢𝙚𝙣𝙜𝙝𝙞𝙩𝙪𝙣𝙜-𝙝𝙞𝙩𝙪𝙣𝙜 𝙣𝙞𝙠𝙢𝙖𝙩 𝘼𝙡𝙡𝙖𝙝, 𝙣𝙚𝙨𝙘𝙖𝙮𝙖 𝙠𝙖𝙢𝙪 𝙩𝙞𝙙𝙖𝙠 𝙖𝙠𝙖𝙣 𝙙𝙖𝙥𝙖𝙩 𝙢𝙚𝙣𝙚𝙣𝙩𝙪𝙠𝙖𝙣 𝙟𝙪𝙢𝙡𝙖𝙝𝙣𝙮𝙖.”\n\nSaya percaya, bila kita bersyukur dan berusaha bersungguh-sungguh, Allah akan cukupkan rezeki kita.\n\nAsbab berada dalam circle yang positif dan ada bisnes yang bersistem, selepas berhenti kerja, saya fokus buat bisnes betul-betul dan Alhamdulillah, income saya selepas itu dah capai 4 hingga 5 angka sebulan. \n\nRezeki terbaik ialah bila Allah tanamkan rasa syukur dalam hati, sabar dalam ujian dan syukur dalam ", "transcript": "Ustaz pernah pesan Jangan sentiasa tengok apa yang orang lain ada tapi lihat apa yang telah Allah berikan kepada kita Bila kita selalu tengok kehidupan orang lain kita akan rasa macam hidup kita ini tak cukup Tapi bila kita berhenti kejap dan tengok kehidupan sendiri rupanya banyak sangat nikmat yang Allah dah bagi Saya bersyukur Allah bagi saya masa bersama keluarga ada masa untuk diri sendiri ada masa untuk belajar dan upgrade skill ada masa untuk mengaji dan bertahudah bor al-Quran ada masa untuk bersedekah bersama anak-anak dan saya bersyukur kerana hari ini saya ada fleksibeliti untuk susun masa sendiasa sendiri Dulu saya tak pernah terfikir kehidupan saya akan jadi macam ini sebab itu saya belajar Jangan terlalu sibuk melihat apa yang orang lain ada sampai kita lupa menyukurit apa yang Allah dah beri kepada kita Dan kalau anda ada impian nak ada kehidupan yang lebih fleksibel cuba explore sesuatu yang berbeza Saya pilih untuk bina bisnes yang bersistem tak mudah tapi tak susah tetap kena belajar, kena buat dan work hard untuk impian tersebut Bila kita konsisten bina sedikit demi sedikit Insya Allah kita boleh cipta kehidupan yang kita impikan Syukur bukan bermaksud kita berhenti mengejar impian Syukur adalah bila kita hargai apa yang Allah beri sampai terus berusaha untuk jadi lebih baik", "brk": "Hook类型: 身份共鸣\n结构: 抛出生活对比 → 讲述个人转变 → 给出行动建议\n为什么火: 击中当代人对自由生活与摆脱内耗的向往\n改编角度: 从辞职创业转为从月薪族到通过攒金实现财务自主", "my": "薪水明明并不低，为什么你还是存不到钱？\n\n很多人都以为，开始购买黄金需要大量资金。\n\n别总把攒Q理财挂嘴边，却一直拖到明天？\n\n其实不是这样的，真正让你存不到钱的，是你一直找不到一个适合普通人的储蓄方式，总觉得存钱很难。\n\n如果你想开始存金，其实不用一次买大克数。\n\n你可以选择开一个GAP户口，这就像银行户口一样方便。\n\n银行户口是储蓄马币，而GAP是储存黄金。\n\n它最方便的地方在于，没有要求每个月都必须存蓄。\n\n你可以随时在有多余钱的时候，存入一点点。\n\n而且在Public Gold，只要你有至少rm100就可以开始存金了。\n\n等你慢慢累积到一定的克数，就可以申请提出来。\n\n不管是Goldbar、dinar，还是手链、项链、戒指各种金饰，都可以自己决定想提出什么。\n\n以前工作很多年，薪水并不低，但总是存不到钱。\n\n想存钱又怕有压力，不知道该怎么开始理财。\n\n现在懂得把多余的钱换成黄金，慢慢累积。\n\n看着户口里的金克一点点增加，心里真的更有底气。\n\n如果你也想开始存黄金，可以先来看看我发给你的资料。\n\n如果你有什么问题，可以随时问我。", "tags": "wanielifejourney, syukurselalu", "bait": false, "type": "Video", "likes": 23, "comments": 0, "er": 0.13, "followers": 18307, "date": "2026-10-02", "url": "https://www.instagram.com/p/Dd-MElnhlC4/", "video": true, "ratio": 0, "score": 0.13, "status": "未处理", "x": 0.7}]</script>
+<script>
+const DATA = JSON.parse(document.getElementById('data').textContent);
+const SUPA = 'https://qtqnsskleonwarhghrvv.supabase.co';
+const ANON = 'sb_publishable_JFjZlxEMCEc6-krCsfPVhg_lEhCbAYE';
+document.getElementById('updated').textContent = '数据更新于 2026-11-13 11:46 (GMT+8)';
+
+const $ = id => document.getElementById(id);
+const I = n => '<svg class="ic"><use href="#i-' + n + '"/></svg>';
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = n => n >= 1e6 ? (n/1e6).toFixed(1)+'M' : n >= 1e3 ? (n/1e3).toFixed(1)+'K' : String(n);
+const getKey = () => ANON;  // anon key is baked in — safe, can only change status
+const firstLine = c => ((c || '').split('\n').map(l => l.trim()).filter(Boolean)[0] || '(无文案)');
+const byRec = {}; DATA.forEach(d => byRec[d.id] = d);
+
+function toast(msg, ok) {
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  t.style.borderColor = ok ? 'var(--green)' : 'var(--red)';
+  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+// ---- mission card ----
+function renderMission() {
+  const role = localStorage.getItem('tm_role') || '';
+  const name = localStorage.getItem('tm_name') || '';
+  const pend = DATA.filter(d => d.status === '未处理').length;
+  const hot = DATA.filter(d => d.status === '未处理' && (d.x || 0) >= 2).length;
+  const queue = DATA.filter(d => d.status === '拍摄中').length;
+  const done = DATA.filter(d => d.status === '已处理').length;
+  const m = $('mission');
+  if (role === 'Marketer') {
+    m.innerHTML = '<div class="mt">' + I('flame') + esc(name) + ',任务:从待挑选里选出值得拍的</div>'
+      + '<div class="md">待挑选 <b>' + pend + '</b> 条(其中真爆款 ×2+ 有 <b>' + hot + '</b> 条)'
+      + ' · 从下面清单直接选,或去雷达细看</div>';
+  } else if (role === 'Content Creator') {
+    m.innerHTML = '<div class="mt">' + I('video') + esc(name) + ',任务:清空拍摄中队列</div>'
+      + '<div class="md">队列还有 <b>' + queue + '</b> 条待做 · 已完成共 <b>' + done + '</b> 条</div>';
+  } else {
+    m.innerHTML = '<div class="mt">' + I('flame') + '团队概览</div>'
+      + '<div class="md">待挑选 <b>' + pend + '</b> 条 · 拍摄中 <b>' + queue + '</b> 条 · 已完成 <b>' + done + '</b> 条</div>';
+  }
+}
+
+function orderSections() {
+  // Marketer sees picks first; Creator sees shooting queue first
+  if ((localStorage.getItem('tm_role') || '') === 'Marketer') {
+    $('secShoot').parentNode.insertBefore($('secPick'), $('secShoot'));
+  } else {
+    $('secPick').parentNode.insertBefore($('secShoot'), $('secPick'));
+  }
+}
+
+// ---- identity ----
+function meLabel() {
+  const n = localStorage.getItem('tm_name'), r = localStorage.getItem('tm_role');
+  $('meLabel').innerHTML = n ? '<b>' + esc(n) + '</b>&nbsp;· ' + esc(r || '') : '未登记';
+}
+function showOverlay() {
+  $('oName').value = localStorage.getItem('tm_name') || '';
+  $('oRole').value = localStorage.getItem('tm_role') || 'Marketer';
+  $('overlay').classList.add('show');
+}
+$('oSave').onclick = () => {
+  const n = $('oName').value.trim();
+  if (!n) { $('oName').focus(); return; }
+  localStorage.setItem('tm_name', n);
+  localStorage.setItem('tm_role', $('oRole').value);
+  $('overlay').classList.remove('show');
+  meLabel(); orderSections(); renderMission();
+  refreshStatuses();
+};
+$('meBtn').onclick = showOverlay;
+meLabel();
+if (!localStorage.getItem('tm_name')) showOverlay();
+
+// ---- tabs ----
+document.querySelectorAll('.ntab').forEach(t => t.onclick = () => {
+  document.querySelectorAll('.ntab').forEach(x => x.classList.toggle('on', x === t));
+  document.querySelectorAll('.page').forEach(p => p.classList.toggle('on', p.id === 'p-' + t.dataset.p));
+  if (t.dataset.p === 'radar' && !$('radarWrap').querySelector('iframe')) {
+    const f = document.createElement('iframe'); f.src = 'index.html'; $('radarWrap').appendChild(f);
+  }
+});
+
+// ---- status write ----
+async function setStatus(d, val) {
+  try {
+    const r = await fetch(SUPA + '/rest/v1/posts?post_id=eq.' + encodeURIComponent(d.id), {
+      method: 'PATCH',
+      headers: { 'apikey': ANON, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ status: val })
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    d.status = val;
+    cacheStatus(d.id, val);
+    toast('✓ @' + d.competitor + ' → ' + val, true);
+  } catch (e) {
+    toast('失败: ' + e.message, false);
+  }
+  renderWork();
+}
+
+// ---- 今日工作 ----
+function pillBtn(cls, icon, label) {
+  return '<button class="pill ' + cls + '">' + I(icon) + label + '</button>';
+}
+
+function renderWork() {
+  const pend = DATA.filter(d => d.status === '未处理');
+  const shoot = DATA.filter(d => d.status === '拍摄中');
+  const done = DATA.filter(d => d.status === '已处理');
+  $('stPending').textContent = pend.length;
+  $('stShoot').textContent = shoot.length;
+  $('stDone').textContent = done.length;
+
+  // shooting queue
+  const sl = $('shootList'); sl.innerHTML = '';
+  if (!shoot.length) sl.innerHTML = '<div class="none">队列是空的 — Marketer 去爆款雷达挑几条拖进「拍摄中」</div>';
+  shoot.forEach(d => {
+    const r = document.createElement('div'); r.className = 'row';
+    r.innerHTML = '<a class="who2" href="https://www.instagram.com/' + d.competitor + '/" target="_blank">@' + esc(d.competitor) + '</a>'
+      + ((d.x || 0) >= 2 ? '<span class="xb">×' + d.x + '</span>' : '')
+      + '<span class="hookline">' + esc(firstLine(d.caption)) + '</span>'
+      + '<a class="pill" href="' + d.url + '" target="_blank">' + I('ext') + '原帖</a>'
+      + pillBtn('ok', 'check', '完成') + pillBtn('bad', 'x', '退回');
+    const btns = r.querySelectorAll('button');
+    btns[0].onclick = () => setStatus(d, '已处理');
+    btns[1].onclick = () => setStatus(d, '未处理');
+    sl.appendChild(r);
+  });
+
+  // picks
+  const picks = pend.filter(d => (d.x || 0) >= 2).sort((a, b) => (b.x || 0) - (a.x || 0)).slice(0, 8);
+  const pl = $('pickList'); pl.innerHTML = '';
+  if (!picks.length) pl.innerHTML = '<div class="none">暂时没有 ×2 以上的未处理爆款 — 等周一自动抓新数据</div>';
+  picks.forEach(d => {
+    const r = document.createElement('div'); r.className = 'row';
+    r.innerHTML = '<span class="xb">×' + d.x + '</span>'
+      + '<a class="who2" href="https://www.instagram.com/' + d.competitor + '/" target="_blank">@' + esc(d.competitor) + '</a>'
+      + '<span class="hookline">' + esc(firstLine(d.caption))
+      + '<small>🔥' + d.score + ' · ER ' + d.er + '% · 💬' + fmt(d.comments) + '</small></span>'
+      + '<a class="pill" href="' + d.url + '" target="_blank">' + I('ext') + '原帖</a>'
+      + pillBtn('ok', 'video', '选中拍摄') + pillBtn('bad', 'x', '跳过');
+    const btns = r.querySelectorAll('button');
+    btns[0].onclick = () => setStatus(d, '拍摄中');
+    btns[1].onclick = () => setStatus(d, '跳过');
+    pl.appendChild(r);
+  });
+  renderMission();
+}
+
+function applyStatusCache() {
+  try {
+    const c = JSON.parse(localStorage.getItem('st_cache') || '{}');
+    Object.keys(c).forEach(rid => { const d = byRec[rid]; if (d) d.status = c[rid]; });
+  } catch (e) {}
+}
+
+function cacheStatus(rid, val) {
+  try {
+    const c = JSON.parse(localStorage.getItem('st_cache') || '{}');
+    c[rid] = val; localStorage.setItem('st_cache', JSON.stringify(c));
+  } catch (e) {}
+}
+
+// ---- live statuses from Supabase ----
+async function refreshStatuses() {
+  applyStatusCache(); renderWork();  // last-known statuses first
+  if (Date.now() - (+localStorage.getItem('st_ts') || 0) < 600000) return;  // 10-min throttle
+  localStorage.setItem('st_ts', String(Date.now()));
+  const fresh = {};
+  try {
+    const r = await fetch(SUPA + '/rest/v1/posts?select=post_id,status', { headers: { 'apikey': ANON } });
+    if (!r.ok) return;
+    (await r.json()).forEach(row => {
+      const d = byRec[row.post_id];
+      if (d) d.status = row.status || '未处理';
+      if (row.status && row.status !== '未处理') fresh[row.post_id] = row.status;
+    });
+    localStorage.setItem('st_cache', JSON.stringify(fresh));
+    renderWork();
+  } catch (e) {}
+}
+
+orderSections();
+renderMission();
+renderWork();
+refreshStatuses();
+</script>
+</body>
+</html>
